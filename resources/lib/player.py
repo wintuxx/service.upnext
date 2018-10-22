@@ -244,6 +244,10 @@ class Player(xbmc.Player):
         self.shortplayLength = int(utils.settings("shortPlayLength")) * 60
         self.includeWatched = utils.settings("includeWatched") == "true"
 
+    def calculateProgressSteps(self):
+        notification_time = utils.settings("autoPlaySeasonTime")
+        return (100 / int(notification_time))/10
+
     def autoPlayPlayback(self):
         currentFile = xbmc.Player().getPlayingFile()
         if not self.addon_data:
@@ -283,11 +287,14 @@ class Player(xbmc.Player):
                 stillWatchingPage = StillWatching(
                     "script-upnext-stillwatching.xml",
                     utils.addon_path(), "default", "1080i")
+            progressStepSize = self.calculateProgressSteps()
             nextUpPage.setItem(episode)
+            nextUpPage.setProgressStepSize(progressStepSize)
             stillWatchingPage.setItem(episode)
+            nextUpPage.setProgressStepSize(progressStepSize)
             playedinarownumber = utils.settings("playedInARow")
             playTime = xbmc.Player().getTime()
-            totalTime =  xbmc.Player().getTotalTime()
+            totalTime = xbmc.Player().getTotalTime()
             self.logMsg("played in a row settings %s" % str(playedinarownumber), 2)
             self.logMsg("played in a row %s" % str(self.playedinarow), 2)
 
@@ -309,6 +316,8 @@ class Player(xbmc.Player):
             while xbmc.Player().isPlaying() and (
                     totalTime - playTime > 1) and not nextUpPage.isCancel() and not nextUpPage.isWatchNow() and not stillWatchingPage.isStillWatching() and not stillWatchingPage.isCancel():
                 xbmc.sleep(100)
+                nextUpPage.updateProgressControl()
+                stillWatchingPage.updateProgressControl()
                 try:
                     playTime = xbmc.Player().getTime()
                     totalTime = xbmc.Player().getTotalTime()
