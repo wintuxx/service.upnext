@@ -1,4 +1,3 @@
-import xbmc
 import xbmcgui
 from platform import machine
 
@@ -14,13 +13,14 @@ class UpNext(xbmcgui.WindowXMLDialog):
     currentProgressPercent = 100
 
     def __init__(self, *args, **kwargs):
+        self.action_exitkeys_id = [10, 13]
+        self.progressControl = None
         if OS_MACHINE[0:5] == 'armv7':
             xbmcgui.WindowXMLDialog.__init__(self)
         else:
             xbmcgui.WindowXMLDialog.__init__(self, *args, **kwargs)
 
     def onInit(self):
-        self.action_exitkeys_id = [10, 13]
         self.setInfo()
         self.prepareProgressControl()
 
@@ -64,11 +64,12 @@ class UpNext(xbmcgui.WindowXMLDialog):
                 'playcount', str(self.item['playcount']))
 
     def prepareProgressControl(self):
+        # noinspection PyBroadException
         try:
             self.progressControl = self.getControl(3014)
             if self.progressControl is not None:
                 self.progressControl.setPercent(self.currentProgressPercent)
-        except:
+        except Exception:
             pass
 
     def setItem(self, item):
@@ -78,12 +79,13 @@ class UpNext(xbmcgui.WindowXMLDialog):
         self.progressStepSize = progressStepSize
 
     def updateProgressControl(self):
+        # noinspection PyBroadException
         try:
             self.currentProgressPercent = self.currentProgressPercent - self.progressStepSize
             self.progressControl = self.getControl(3014)
             if self.progressControl is not None:
                 self.progressControl.setPercent(self.currentProgressPercent)
-        except:
+        except Exception:
             pass
 
     def setCancel(self, cancel):
@@ -107,15 +109,13 @@ class UpNext(xbmcgui.WindowXMLDialog):
     def closeDialog(self):
         self.close()
 
-    def onClick(self, controlID):
+    def onClick(self, control_id):
 
-        xbmc.log('nextup info onclick: ' + str(controlID))
-
-        if controlID == 3012:
+        if control_id == 3012:
             # watch now
             self.setWatchNow(True)
             self.close()
-        elif controlID == 3013:
+        elif control_id == 3013:
             # cancel
             self.setCancel(True)
             self.close()
@@ -124,6 +124,5 @@ class UpNext(xbmcgui.WindowXMLDialog):
 
     def onAction(self, action):
 
-        xbmc.log('nextup info action: ' + str(action.getId()))
         if action == ACTION_PLAYER_STOP:
             self.close()

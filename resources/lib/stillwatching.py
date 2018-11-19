@@ -1,6 +1,5 @@
 from platform import machine
 
-import xbmc
 import xbmcgui
 
 ACTION_PLAYER_STOP = 13
@@ -16,6 +15,7 @@ class StillWatching(xbmcgui.WindowXMLDialog):
 
     def __init__(self, *args, **kwargs):
         self.action_exitkeys_id = [10, 13]
+        self.progressControl = None
         if OS_MACHINE[0:5] == 'armv7':
             xbmcgui.WindowXMLDialog.__init__(self)
         else:
@@ -65,11 +65,12 @@ class StillWatching(xbmcgui.WindowXMLDialog):
                 'playcount', str(self.item['playcount']))
 
     def prepareProgressControl(self):
+        # noinspection PyBroadException
         try:
-            self.progressControl = self.getControl(4014)
+            self.progressControl = self.getControl(3014)
             if self.progressControl is not None:
                 self.progressControl.setPercent(self.currentProgressPercent)
-        except:
+        except Exception:
             pass
 
     def setItem(self, item):
@@ -79,12 +80,13 @@ class StillWatching(xbmcgui.WindowXMLDialog):
         self.progressStepSize = progressStepSize
 
     def updateProgressControl(self):
+        # noinspection PyBroadException
         try:
             self.currentProgressPercent = self.currentProgressPercent - self.progressStepSize
-            self.progressControl = self.getControl(4014)
+            self.progressControl = self.getControl(3014)
             if self.progressControl is not None:
                 self.progressControl.setPercent(self.currentProgressPercent)
-        except:
+        except Exception:
             pass
 
     def setCancel(self, cancel):
@@ -108,21 +110,18 @@ class StillWatching(xbmcgui.WindowXMLDialog):
     def closeDialog(self):
         self.close()
 
-    def onClick(self, controlID):
+    def onClick(self, control_id):
 
-        xbmc.log("still watching info onclick: " + str(controlID))
-
-        if controlID == 4012:
+        if control_id == 3012:
             # still watching
             self.setStillWatching(True)
             self.close()
-        elif controlID == 4013:
+        elif control_id == 3013:
             # cancel
             self.setCancel(True)
             self.close()
         pass
 
     def onAction(self, action):
-        xbmc.log("still watching info action: " + str(action.getId()))
         if action == ACTION_PLAYER_STOP:
             self.close()
